@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from qie.data.validation.provider_data import validate_provider_bars
+
 import polars as pl
 import yfinance as yf  # type: ignore
 
@@ -67,6 +69,8 @@ class YahooMarketDataProvider(MarketDataProvider):
         frame = frame.with_columns(
             pl.lit(symbol.strip().upper()).alias("symbol")
         )
+
+        validate_provider_bars(frame)
 
         return frame.select(
             [
