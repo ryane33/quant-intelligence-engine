@@ -5,6 +5,7 @@ import pytest
 
 from qie.data.validation.provider_data import validate_provider_bars
 
+from qie.data.exceptions import InvalidMarketDataError
 
 def test_rejects_duplicate_timestamps() -> None:
     frame = pl.DataFrame(
@@ -23,7 +24,7 @@ def test_rejects_duplicate_timestamps() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="Duplicate timestamps found"):
+    with pytest.raises(InvalidMarketDataError, match="Duplicate timestamps found"):
         validate_provider_bars(frame)
 
 
@@ -45,7 +46,7 @@ def test_rejects_null_values() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="Null values found"):
+    with pytest.raises(InvalidMarketDataError, match="Null values found"):
         validate_provider_bars(frame)
 
 
@@ -64,7 +65,7 @@ def test_rejects_missing_required_columns() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="Missing required columns"):
+    with pytest.raises(InvalidMarketDataError, match="Missing required columns"):
         validate_provider_bars(frame)
 
 
@@ -85,7 +86,7 @@ def test_rejects_unsorted_timestamps() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="Timestamps are not sorted"):
+    with pytest.raises(InvalidMarketDataError, match="Timestamps are not sorted"):
         validate_provider_bars(frame)
 
 
@@ -103,5 +104,8 @@ def test_rejects_invalid_ohlc_relationships() -> None:
         }
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        InvalidMarketDataError,
+        match="Open values are greater than high values",
+    ):
         validate_provider_bars(frame)

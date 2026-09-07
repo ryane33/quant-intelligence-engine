@@ -7,6 +7,13 @@ import yfinance as yf  # type: ignore
 
 from qie.data.ingestion.base import MarketDataProvider
 
+from qie.data.exceptions import (
+    InvalidDateRangeError,
+    MarketDataUnavailableError,
+    UnsupportedTimeframeError,
+    InvalidMarketDataError, 
+)
+
 
 class YahooMarketDataProvider(MarketDataProvider):
     """Market data provider for Yahoo Finance."""
@@ -25,13 +32,13 @@ class YahooMarketDataProvider(MarketDataProvider):
         }
 
         if start >= end:
-            raise ValueError("start must be earlier than end")
+            raise InvalidDateRangeError("start must be earlier than end")
 
         if not symbol.strip():
             raise ValueError("symbol must not be blank")
 
         if timeframe not in interval_map:
-            raise ValueError(f"Unsupported timeframe: {timeframe}")
+            raise UnsupportedTimeframeError(f"Unsupported timeframe: {timeframe}")
 
         data = yf.download(  # type: ignore
             symbol,
@@ -43,7 +50,7 @@ class YahooMarketDataProvider(MarketDataProvider):
         )
 
         if data is None or data.empty:
-            raise ValueError(f"No data found for {symbol}")
+            raise MarketDataUnavailableError(f"No data found for {symbol}")
 
         data.columns = [
             column[0] if isinstance(column, tuple) else column

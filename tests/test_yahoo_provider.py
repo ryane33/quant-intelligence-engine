@@ -4,6 +4,7 @@ from datetime import datetime
 
 from qie.data.ingestion.yahoo import YahooMarketDataProvider
 
+from qie.data.exceptions import (InvalidDateRangeError, MarketDataUnavailableError, UnsupportedTimeframeError)
 
 def test_yahoo_returns_canonical_columns() -> None:
     provider = YahooMarketDataProvider()
@@ -72,30 +73,19 @@ def test_yahoo_timestamps_are_sorted() -> None:
     assert data["timestamp"].is_sorted()
 
 
-def test_yahoo_rejects_bad_symbol() -> None:
-    provider = YahooMarketDataProvider()
-
-    with pytest.raises(ValueError, match="No data found"):
-        provider.get_bars(
-            symbol="THIS_IS_NOT_A_REAL_TICKER_12345",
-            start=datetime(2024, 1, 1),
-            end=datetime(2024, 2, 1),
-            timeframe="1Day",
-        )
-
-
 def test_yahoo_rejects_invalid_date_range() -> None:
     provider = YahooMarketDataProvider()
 
-    with pytest.raises(ValueError, match="start must be earlier than end"):
+    with pytest.raises(
+        InvalidDateRangeError,
+        match="start must be earlier than end",
+    ):
         provider.get_bars(
             symbol="AAPL",
             start=datetime(2024, 2, 1),
             end=datetime(2024, 1, 1),
             timeframe="1Day",
         )
-
-
 
 def test_yahoo_rejects_blank_symbol() -> None:
     provider = YahooMarketDataProvider()
@@ -106,4 +96,30 @@ def test_yahoo_rejects_blank_symbol() -> None:
             start=datetime(2024, 1, 1),
             end=datetime(2024, 2, 1),
             timeframe="1Day",
+        )
+
+def test_yahoo_rejects_bad_symbol() -> None:
+    provider = YahooMarketDataProvider()
+
+    with pytest.raises(MarketDataUnavailableError, match="No data found"):
+        provider.get_bars(
+            symbol="THIS_IS_NOT_A_REAL_TICKER_12345",
+            start=datetime(2024, 1, 1),
+            end=datetime(2024, 2, 1),
+            timeframe="1Day",
+        )
+
+
+def test_yahoo_rejects_unsupported_timeframe() -> None:
+    provider = YahooMarketDataProvider()
+
+    with pytest.raises(
+        UnsupportedTimeframeError,
+        match="Unsupported timeframe",
+    ):
+        provider.get_bars(
+            symbol="AAPL",
+            start=datetime(2024, 1, 1),
+            end=datetime(2024, 2, 1),
+            timeframe="2Day",
         )
