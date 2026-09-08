@@ -9,6 +9,12 @@ import polars as pl
 class MarketDataProvider(ABC):
     """Abstract interface for historical market-data providers."""
 
+    @property
+    @abstractmethod
+    def supported_timeframes(self) -> set[str]:
+        """Return the timeframes supported by this provider."""
+        raise NotImplementedError
+
     @abstractmethod
     def get_bars(
         self,
@@ -17,5 +23,10 @@ class MarketDataProvider(ABC):
         end: datetime,
         timeframe: str = "1Day",
     ) -> pl.DataFrame:
-        """Return historical OHLCV bars for a symbol."""
+        """Return nonempty canonical single-symbol bars in [start, end).
+
+        See qie.data.validation.contract and docs/DATA_CONTRACT.md. Daily
+        timestamps label session dates at midnight UTC; intraday bars use UTC
+        instants. Implementations reject duplicate/unsorted or invalid data.
+        """
         raise NotImplementedError

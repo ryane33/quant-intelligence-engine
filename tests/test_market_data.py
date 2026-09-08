@@ -47,3 +47,30 @@ def test_cumulative_return() -> None:
     result = add_returns(frame)
 
     assert cumulative_return(result) == pytest.approx(0.21)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("high", 90.0),
+        ("low", 110.0),
+        ("open", float("inf")),
+        ("close", float("nan")),
+        ("volume", float("inf")),
+    ],
+)
+def test_ohlcv_bar_rejects_invalid_values_on_construction(
+    field: str, value: float
+) -> None:
+    values = {
+        "symbol": "AAPL",
+        "timestamp": datetime(2024, 1, 2, tzinfo=UTC),
+        "open": 100.0,
+        "high": 105.0,
+        "low": 95.0,
+        "close": 101.0,
+        "volume": 1000.0,
+    }
+    values[field] = value
+    with pytest.raises(ValueError):
+        OHLCVBar(**values)

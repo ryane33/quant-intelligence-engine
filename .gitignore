@@ -8,3 +8,15 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local credentials (keep the documented example tracked)
+.env
+.env.*
+!.env.example
+
+# Test, lint, and coverage artifacts
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
